@@ -32,7 +32,6 @@ jobs:
           echo "MESSAGE1<<$EOF1" >> "$GITHUB_OUTPUT"
           echo "$OUTPUT_PART1" >> "$GITHUB_OUTPUT"
           echo "$EOF1" >> "$GITHUB_OUTPUT"
-          git stash
         id: pr_score
 
       - name: Switch to main branch
