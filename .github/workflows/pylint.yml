@@ -35,9 +35,10 @@ jobs:
         id: pr_score
 
       - name: Switch to main branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: main
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Get pylint score of main branch
         run: |
