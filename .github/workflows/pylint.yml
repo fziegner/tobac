@@ -43,8 +43,9 @@ jobs:
           echo "MESSAGE1<<$EOF1" >> "$GITHUB_OUTPUT"
           echo "$OUTPUT_PART1" >> "$GITHUB_OUTPUT"
           echo "$EOF1" >> "$GITHUB_OUTPUT"
+        id: main_score
 
-      - name: Switch to main branch
+      - name: Switch to PR branch
         uses: actions/checkout@v4
         with:
           path: "${{ steps.git.outputs.SHA_SHORT}}"  
@@ -57,13 +58,14 @@ jobs:
           echo "MESSAGE2<<$EOF2" >> "$GITHUB_OUTPUT"
           echo "$OUTPUT_PART2" >> "$GITHUB_OUTPUT"
           echo "$EOF2" >> "$GITHUB_OUTPUT"
+        id: pr_score
 
       - name: Post result to PR
         uses: mshick/add-pr-comment@v1
         with:
           message: |
-            ${{ env.MESSAGE1}}
-            ${{ env.MESSAGE2}}
+            ${{ steps.main_score.outputs.MESSAGE1}}
+            ${{ steps.pr_score.outputs.MESSAGE2}}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]' # The user.login for temporary GitHub token
           allow-repeats: false # This is the default
