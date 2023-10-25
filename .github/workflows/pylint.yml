@@ -21,17 +21,7 @@ jobs:
           pip install .
           pip install --upgrade pylint
           
-      - name: Store the PR branch
-        run: |
-          echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-        id: git
-
-      - name: Switch to main branch
-        uses: actions/checkout@v4
-        with:
-          path: main
-
-      - name: Get pylint score of main branch
+      - name: Get pylint score of PR branch
         run: |
           pip install pylint
           # use shell script to save only tail of output  
@@ -43,22 +33,24 @@ jobs:
           echo "MESSAGE1<<$EOF1" >> "$GITHUB_OUTPUT"
           echo "$OUTPUT_PART1" >> "$GITHUB_OUTPUT"
           echo "$EOF1" >> "$GITHUB_OUTPUT"
-        id: main_score
+        id: pr_score
 
-      - name: Switch to PR branch
+      - name: Switch to main branch
         uses: actions/checkout@v4
         with:
-          path: "${{ steps.git.outputs.SHA_SHORT}}"  
+          path: main
 
-      - name: Get pylint score of PR branch
+      - name: Get pylint score of main branch
         run: |
+          pip uninstall tobac
+          pip install .
           OUTPUT_PART2=$(pylint tobac --disable=C | tail -n 3)
           pylint tobac --disable=C --exit-zero
           EOF2=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "MESSAGE2<<$EOF2" >> "$GITHUB_OUTPUT"
           echo "$OUTPUT_PART2" >> "$GITHUB_OUTPUT"
           echo "$EOF2" >> "$GITHUB_OUTPUT"
-        id: pr_score
+        id: main_score
 
       - name: Post result to PR
         uses: mshick/add-pr-comment@v1
