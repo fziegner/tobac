@@ -23,7 +23,6 @@ jobs:
           
       - name: Get pylint score of PR branch
         run: |
-          pip install pylint
           # use shell script to save only tail of output  
           OUTPUT_PART1=$(pylint tobac --disable=C | tail -n 3)
           # but post entire output in the action details 
@@ -36,7 +35,7 @@ jobs:
         id: pr_score
 
       - name: Switch to main branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           path: main
 
@@ -44,6 +43,8 @@ jobs:
         run: |
           pip uninstall -y tobac
           pip install .
+          pip uninstall -y pylint
+          pip install --upgrade pylint
           OUTPUT_PART2=$(pylint tobac --disable=C | tail -n 3)
           pylint tobac --disable=C --exit-zero
           EOF2=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
@@ -56,8 +57,8 @@ jobs:
         uses: mshick/add-pr-comment@v1
         with:
           message: |
-            ${{ steps.main_score.outputs.MESSAGE1}}
-            ${{ steps.pr_score.outputs.MESSAGE2}}
+            ${{ steps.pr_score.outputs.MESSAGE1}}
+            ${{ steps.main_score.outputs.MESSAGE2}}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]' # The user.login for temporary GitHub token
           allow-repeats: false # This is the default
