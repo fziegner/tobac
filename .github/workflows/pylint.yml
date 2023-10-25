@@ -42,7 +42,7 @@ jobs:
 
       - name: Get pylint score of main branch
         run: |
-          pip uninstall tobac
+          pip uninstall -y tobac
           pip install .
           OUTPUT_PART2=$(pylint tobac --disable=C | tail -n 3)
           pylint tobac --disable=C --exit-zero
