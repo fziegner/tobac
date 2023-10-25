@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
         
       - name: Set up Python
         uses: actions/setup-python@v3
@@ -37,6 +39,9 @@ jobs:
 
       - name: Switch to main branch
         uses: actions/checkout@v2
+        with:
+          path: main
+          fetch-depth: 0
 
       - name: Get pylint score of main branch
         run: |
