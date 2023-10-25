@@ -10,8 +10,6 @@ jobs:
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
         
       - name: Set up Python
         uses: actions/setup-python@v3
@@ -34,12 +32,11 @@ jobs:
           echo "MESSAGE1<<$EOF1" >> "$GITHUB_OUTPUT"
           echo "$OUTPUT_PART1" >> "$GITHUB_OUTPUT"
           echo "$EOF1" >> "$GITHUB_OUTPUT"
+          git stash
         id: pr_score
 
       - name: Switch to main branch
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       - name: Get pylint score of main branch
         run: |
