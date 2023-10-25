@@ -26,9 +26,13 @@ jobs:
           echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
         id: git
 
+      - name: Switch to main branch
+      - uses: actions/checkout@v4
+        with:
+          path: main
+
       - name: Get pylint score of main branch
         run: |
-          git checkout main
           pip install pylint
           # use shell script to save only tail of output  
           OUTPUT_PART1=$(pylint tobac --disable=C | tail -n 3)
@@ -40,9 +44,13 @@ jobs:
           echo "$OUTPUT_PART1" >> "$GITHUB_OUTPUT"
           echo "$EOF1" >> "$GITHUB_OUTPUT"
 
+      - name: Switch to main branch
+      - uses: actions/checkout@v4
+        with:
+          path: "${{ steps.git.outputs.SHA_SHORT}}"  
+
       - name: Get pylint score of PR branch
         run: |
-          git checkout "${{ steps.git.outputs.SHA_SHORT}}"  
           OUTPUT_PART2=$(pylint tobac --disable=C | tail -n 3)
           pylint tobac --disable=C --exit-zero
           EOF2=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
