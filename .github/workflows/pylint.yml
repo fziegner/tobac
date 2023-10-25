@@ -42,7 +42,7 @@ jobs:
 
       - name: Get pylint score of PR branch
         run: |
-          git checkout "${{ steps.git.outputs.SHA_SHORT)}"  
+          git checkout "${{ steps.git.outputs.SHA_SHORT}}"  
           OUTPUT_PART2=$(pylint tobac --disable=C | tail -n 3)
           pylint tobac --disable=C --exit-zero
           EOF2=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
