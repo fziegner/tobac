@@ -43,8 +43,6 @@ jobs:
         run: |
           pip uninstall -y tobac
           pip install .
-          pip uninstall -y pylint
-          pip install --upgrade pylint
           OUTPUT_PART2=$(pylint tobac --disable=C | tail -n 3)
           pylint tobac --disable=C --exit-zero
           EOF2=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
