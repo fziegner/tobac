@@ -18,7 +18,7 @@ jobs:
 
       - name: Store the PR branch
         run: |
-          echo "SHA=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_OUTPUT
+          echo "SHA=$(git rev-parse "$GITHUB_SHA")" >> $GITHUB_OUTPUT
         id: git
         
       - name: Switch to main branch
