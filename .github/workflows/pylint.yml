@@ -49,7 +49,7 @@ jobs:
           pylint tobac --disable=C --exit-zero
           # define random delimiter for multiline string
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-          echo "MESSAGE << $EOF" >> "$GITHUB_OUTPUT"
+          echo "MESSAGE<<$EOF" >> "$GITHUB_OUTPUT"
           echo "$OUTPUT_PART" >> "$GITHUB_OUTPUT"
           echo "$EOF" >> "$GITHUB_OUTPUT"
         id: pr_score
