@@ -46,7 +46,7 @@ jobs:
       - name: Switch to PR branch
         uses: actions/checkout@v2
         with:
-          path: "${{ steps.git.outputs.SHA_SHORT}}"  
+          ref: "${{ steps.git.outputs.SHA_SHORT}}"  
 
       - name: Get pylint score of PR branch
         run: |
