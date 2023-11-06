@@ -20,19 +20,11 @@ jobs:
         run: |
           pip install .
           pip install --upgrade pylint
-          
-      - name: Get pylint score of PR branch
+
+      - name: Store the PR branch
         run: |
-          # use shell script to save only tail of output  
-          OUTPUT_PART1=$(pylint tobac --disable=C | tail -n 3)
-          # but post entire output in the action details 
-          pylint tobac --disable=C --exit-zero
-          # define random delimiter for multiline string
-          EOF1=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-          echo "MESSAGE1<<$EOF1" >> "$GITHUB_OUTPUT"
-          echo "$OUTPUT_PART1" >> "$GITHUB_OUTPUT"
-          echo "$EOF1" >> "$GITHUB_OUTPUT"
-        id: pr_score
+          echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        id: git
 
       - name: Switch to main branch
         uses: actions/checkout@v2
@@ -50,6 +42,24 @@ jobs:
           echo "$OUTPUT_PART2" >> "$GITHUB_OUTPUT"
           echo "$EOF2" >> "$GITHUB_OUTPUT"
         id: main_score
+
+      - name: Switch to PR branch
+        uses: actions/checkout@v2
+        with:
+          path: "${{ steps.git.outputs.SHA_SHORT}}"  
+
+      - name: Get pylint score of PR branch
+        run: |
+          # use shell script to save only tail of output  
+          OUTPUT_PART1=$(pylint tobac --disable=C | tail -n 3)
+          # but post entire output in the action details 
+          pylint tobac --disable=C --exit-zero
+          # define random delimiter for multiline string
+          EOF1=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "MESSAGE1<<$EOF1" >> "$GITHUB_OUTPUT"
+          echo "$OUTPUT_PART1" >> "$GITHUB_OUTPUT"
+          echo "$EOF1" >> "$GITHUB_OUTPUT"
+        id: pr_score
 
       - name: Post result to PR
         uses: mshick/add-pr-comment@v1
