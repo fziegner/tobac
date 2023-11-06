@@ -35,12 +35,12 @@ jobs:
         run: |
           pip uninstall -y tobac
           pip install .
-          OUTPUT_PART2=$(pylint tobac --disable=C | tail -n 3)
+          OUTPUT_PART1=$(pylint tobac --disable=C | tail -n 3)
           pylint tobac --disable=C --exit-zero
           EOF2=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-          echo "MESSAGE2<<$EOF2" >> "$GITHUB_OUTPUT"
-          echo "$OUTPUT_PART2" >> "$GITHUB_OUTPUT"
-          echo "$EOF2" >> "$GITHUB_OUTPUT"
+          echo "MESSAGE1<<$EOF1" >> "$GITHUB_OUTPUT"
+          echo "$OUTPUT_PART1" >> "$GITHUB_OUTPUT"
+          echo "$EOF1" >> "$GITHUB_OUTPUT"
         id: main_score
 
       - name: Switch to PR branch
@@ -51,22 +51,22 @@ jobs:
       - name: Get pylint score of PR branch
         run: |
           # use shell script to save only tail of output  
-          OUTPUT_PART1=$(pylint tobac --disable=C | tail -n 3)
+          OUTPUT_PART2=$(pylint tobac --disable=C | tail -n 3)
           # but post entire output in the action details 
           pylint tobac --disable=C --exit-zero
           # define random delimiter for multiline string
           EOF1=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-          echo "MESSAGE1<<$EOF1" >> "$GITHUB_OUTPUT"
-          echo "$OUTPUT_PART1" >> "$GITHUB_OUTPUT"
-          echo "$EOF1" >> "$GITHUB_OUTPUT"
+          echo "MESSAGE2<<$EOF2" >> "$GITHUB_OUTPUT"
+          echo "$OUTPUT_PART2" >> "$GITHUB_OUTPUT"
+          echo "$EOF2" >> "$GITHUB_OUTPUT"
         id: pr_score
 
       - name: Post result to PR
         uses: mshick/add-pr-comment@v1
         with:
           message: |
-            ${{ steps.pr_score.outputs.MESSAGE1}}
-            ${{ steps.main_score.outputs.MESSAGE2}}
+            ${{ steps.main_score.outputs.MESSAGE1}}
+            ${{ steps.pr_score.outputs.MESSAGE2}}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]' # The user.login for temporary GitHub token
           allow-repeats: false # This is the default
