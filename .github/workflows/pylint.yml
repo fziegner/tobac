@@ -37,7 +37,7 @@ jobs:
           pip install .
           OUTPUT_PART1=$(pylint tobac --disable=C | tail -n 3)
           pylint tobac --disable=C --exit-zero
-          EOF2=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          EOF1=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "MESSAGE1<<$EOF1" >> "$GITHUB_OUTPUT"
           echo "$OUTPUT_PART1" >> "$GITHUB_OUTPUT"
           echo "$EOF1" >> "$GITHUB_OUTPUT"
@@ -55,7 +55,7 @@ jobs:
           # but post entire output in the action details 
           pylint tobac --disable=C --exit-zero
           # define random delimiter for multiline string
-          EOF1=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          EOF2=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "MESSAGE2<<$EOF2" >> "$GITHUB_OUTPUT"
           echo "$OUTPUT_PART2" >> "$GITHUB_OUTPUT"
           echo "$EOF2" >> "$GITHUB_OUTPUT"
