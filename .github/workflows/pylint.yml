@@ -15,11 +15,6 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: '3.9'
-          
-      - name: Install tobac and pylint 
-        run: |
-          pip install .
-          pip install --upgrade pylint
 
       - name: Store the PR branch
         run: |
@@ -30,6 +25,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: main
+
+      - name: Install tobac and pylint 
+        run: |
+          pip install .
+          pip install --upgrade pylint
 
       - name: Get pylint score of main branch
         run: |
@@ -67,6 +67,7 @@ jobs:
           message: |
             ${{ steps.main_score.outputs.MESSAGE1}}
             ${{ steps.pr_score.outputs.MESSAGE2}}
+            123
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]' # The user.login for temporary GitHub token
           allow-repeats: false # This is the default
