@@ -18,9 +18,9 @@ jobs:
 
       - name: Store the PR branch
         run: |
-          echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "SHA=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_OUTPUT
         id: git
-
+        
       - name: Switch to main branch
         uses: actions/checkout@v2
         with:
@@ -46,7 +46,7 @@ jobs:
       - name: Switch to PR branch
         uses: actions/checkout@v2
         with:
-          ref: "${{ steps.git.outputs.SHA_SHORT}}"  
+          ref: "${{ steps.git.outputs.SHA}}"  
 
       - name: Get pylint score of PR branch
         run: |
