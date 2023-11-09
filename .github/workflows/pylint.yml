@@ -58,6 +58,7 @@ jobs:
         uses: mshick/add-pr-comment@v1
         with:
           message: |
+            $OUTPUT_PART
             ${{ steps.pr_score.outputs.MESSAGE}}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]' # The user.login for temporary GitHub token
