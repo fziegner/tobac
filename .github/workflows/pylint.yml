@@ -44,7 +44,7 @@ jobs:
       - name: Get pylint score of PR branch
         run: |
           # use shell script to save only tail of output  
-          OUTPUT_PART=$(pylint tobac --disable=C | tail -n 3)
+          OUTPUT_PART=$(pylint tobac --disable=C | tail -n 2)
           # but post entire output in the action details 
           pylint tobac --disable=C --exit-zero
           # define random delimiter for multiline string
@@ -58,7 +58,11 @@ jobs:
         uses: mshick/add-pr-comment@v1
         with:
           message: |
+            Linting results by Pylint:
+            --------------------------
             ${{ steps.pr_score.outputs.MESSAGE}}
+            <sub>The linting score is an indicator that reflects how well the code adheres to Pylint’s coding standards and quality metrics. 
+            A decrease usually indicates new code was added that does not meet style guidelines or has potential errors.<sup>
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]' # The user.login for temporary GitHub token
-          allow-repeats: false # This is the default
+          allow-repeats: true # This is the default
