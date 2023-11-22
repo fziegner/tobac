@@ -65,4 +65,4 @@ jobs:
             A decrease usually indicates new code was added that does not meet style guidelines or has potential errors.<sup>
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]' # The user.login for temporary GitHub token
-          allow-repeats: true # This is the default
+          allow-repeats: false # This is the default
