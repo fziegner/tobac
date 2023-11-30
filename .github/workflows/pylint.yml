@@ -39,12 +39,8 @@ jobs:
       - name: Install tobac and pylint 
         run: |
           mamba install -c conda-forge --yes pylint
-          mamba install -c conda-forge --yes --file example_requirements.txt
-
-      - name: Get pylint score of main branch
-        run: |
+          mamba install -c conda-forge --yes --file example_requirements.txt && 
           pylint tobac --disable=C --exit-zero
-        id: main_score
 
       - name: Switch to PR branch
         uses: actions/checkout@v3
