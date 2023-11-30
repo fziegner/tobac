@@ -41,8 +41,8 @@ jobs:
 
       - name: Install tobac and pylint 
         run: |
-          mamba install --quiet --yes --file requirements.txt
           mamba install -c conda-forge --yes pylint
+          mamba install -c conda-forge --yes --file example_requirements.txt
 
       - name: Get pylint score of main branch
         run: |
