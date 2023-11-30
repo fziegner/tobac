@@ -14,7 +14,20 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: '3.9'
+          python-version: '3.11'
+
+      - name: set up conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-version: latest
+          miniforge-variant: mambaforge
+          channel-priority: strict
+          channels: conda-forge
+          show-channel-urls: true
+          use-only-tar-bz2: true
+          auto-update-conda: true
+          auto-activate-base: false
+          activate-environment: linting-env
 
       - name: Store the PR branch
         run: |
@@ -28,8 +41,8 @@ jobs:
 
       - name: Install tobac and pylint 
         run: |
-          pip install .
-          pip install --upgrade pylint
+          mamba install .
+          mamba install -c conda-forge --yes pylint
 
       - name: Get pylint score of main branch
         run: |
