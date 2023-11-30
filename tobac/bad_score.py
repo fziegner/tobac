@@ -1,6 +1,8 @@
 from pandas import *
 from numpy import *
 from tobac import *
+from scipy import *
+from matplotlib import *
 
 a1 = 1
 a2 = 1
