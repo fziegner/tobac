@@ -35,8 +35,3 @@ list = ['a', 'b', 'c']
 class AnotherClass(object):
   def not_used_method(self):
       pass
-
-# usage of myClass that will increase the Pylint issues count
-instance = myClass()
-instance.BADMethodNaming(42)
-print(instance.BADMethodNaming('1'))
