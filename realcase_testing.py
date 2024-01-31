@@ -1,11 +1,16 @@
 import glob
 import os
+import subprocess
+import sys
+
 import xarray as xr
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbconvert.preprocessors import CellExecutionError
 from git import Repo
+
 import tempfile
+import venv
 
 # Configuration
 git_repo_path = "./"
@@ -14,12 +19,11 @@ reference_folder_name = "reference_data"
 
 
 def get_notebooks_paths(root_dir):
-    notebook_paths = {}
+    notebook_paths = []
     for path, dirs, files in os.walk(root_dir):
         for file in files:
-            if file.endswith(".ipynb"):
-                notebook_path = os.path.join(path, file)
-                notebook_paths[file] = notebook_path
+            if file.startswith("Example") and file.endswith(".ipynb"):
+                notebook_paths.append(os.path.join(path, file))
     return notebook_paths
 
 
@@ -55,6 +59,7 @@ def get_head_notebooks(repo_path):
 
     head_tree = repo.head.commit.tree
     notebook_paths = [blob.path for blob in head_tree.traverse() if blob.path.startswith("examples") and blob.path.endswith(".ipynb")]
+    print(notebook_paths)
     return notebook_paths
 
 
@@ -68,40 +73,92 @@ def read_file_in_head(repo_path, file_path):
     return file_content
 
 
-def main(source="wd", target="HEAD"):
+def download_reference_files(commit_hash, output_directory, temp_folder_name):
+
+    username = "fziegner"
+    repo_url = f'https://github.com/{username}/tobac.git'
+
+    repo = Repo.clone_from(repo_url, os.path.join(output_directory, temp_folder_name), no_checkout=True)
+    repo.git.checkout(commit_hash)
+
+    return os.path.join(output_directory, temp_folder_name)
+
+
+def create_reference_data(source_directory, output_folder_name, output_directory, notebook_folder_name):
+
+    reference_list = []
+    if not isinstance(source_directory, list):
+        notebooks = get_notebooks_paths(os.path.join(source_directory, notebook_folder_name))
+    else:
+        notebooks = source_directory
+
+    for notebook in notebooks:
+        notebook_name = os.path.basename(notebook).split(".")[0]
+        os.makedirs(os.path.join(output_directory, output_folder_name, notebook_name))
+        run_notebook(notebook, os.path.join(output_directory, output_folder_name, notebook_name))
+        reference_list.extend(glob.glob(os.path.join(output_directory, output_folder_name, notebook_name, "Save", "*")))
+        break
+
+    return reference_list
+
+
+def download_tobac(dest_directory, dest_folder, tag="v1.5.1", ):
+
+    repo_url = f'https://github.com/tobac-project/tobac.git'
+
+    repo = Repo.clone_from(repo_url, os.path.join(dest_directory, dest_folder))
+    repo.git.checkout(tag)
+
+    return os.path.join(dest_directory, dest_folder)
+
+
+def create_venv(env_dir):
+
+    venv.create(env_dir, with_pip=True)
+
+    if sys.platform == "win32":
+        python_exec = os.path.join(env_dir, 'Scripts', 'python')
+        pip_exec = os.path.join(env_dir, 'Scripts', 'pip')
+    else:
+        python_exec = os.path.join(env_dir, 'bin', 'python')
+        pip_exec = os.path.join(env_dir, 'bin', 'pip')
+
+    return python_exec, pip_exec
+
+
+def install_requirements(pip_exec, project_dir):
+
+    subprocess.run([pip_exec, 'install', '-r', os.path.join(project_dir, 'requirements.txt')], check=True)
+    subprocess.run([pip_exec, 'install', project_dir], check=True)
+
+
+def main(source="HEAD", target="wd", source_commit=True, target_commit=True, source_commit_hash="d3bca1a1dc5e34ec7d69f968e21a2c71520c545b", target_commit_hash="d3bca1a1dc5e34ec7d69f968e21a2c71520c545b"):
 
     with tempfile.TemporaryDirectory() as tmp:
-        if source == "HEAD":
-            notebooks = get_head_notebooks(git_repo_path)
+
+        if source_commit:
+            source_files_location = download_reference_files(source_commit_hash, output_directory=tmp, temp_folder_name="source_temp_repo")
+            source_references = create_reference_data(source_files_location, "source_data_references", tmp, "examples")
+        elif source == "HEAD":
+            source_files_location = get_head_notebooks(git_repo_path)
+            source_references = create_reference_data(source_files_location, "source_data_references", tmp, "examples")
         else:
-            notebooks = get_notebooks_paths(git_repo_path + notebook_folder_name).values()
+            source_references = create_reference_data(git_repo_path, "source_data_references", tmp, "examples")
 
-        if target == "HEAD":
-            notebooks_reference = get_head_notebooks(git_repo_path)
+        if target_commit:
+            target_files_location = download_reference_files(target_commit_hash, output_directory=tmp, temp_folder_name="target_temp_repo")
+            target_references = create_reference_data(target_files_location, "target_data_references", tmp, "examples")
+        elif target == "HEAD":
+            target_files_location = get_head_notebooks(git_repo_path)
+            target_references = create_reference_data(target_files_location, "target_data_references", tmp, "examples")
+        else:
+            target_references = create_reference_data(git_repo_path, "target_data_references", tmp, "examples")
 
-        for nb in notebooks:
-            notebook_name = nb.replace("\\", "/").split("/")[-1].split(".")[0]
-            os.mkdir(os.path.join(tmp, notebook_name))
-            run_notebook(nb, os.path.join(tmp, notebook_name))
-            netcdf_files = glob.glob(os.path.join(tmp, notebook_name, "Save", "*"))
-            if target == "zenodo":
-                reference_folder = git_repo_path + os.path.join(reference_folder_name, notebook_name, "Save")
-                for local_file in netcdf_files:
-                    reference_file = os.path.join(reference_folder, local_file.rsplit(os.sep, 1)[1])
-                    if os.path.exists(reference_file):
-                        result = compare_files(local_file, reference_file)
-                        print(f"Comparison result for {nb}: {'Same' if result else 'Different'}")
-            else:
-                for nb_ in notebooks_reference:
-                    if notebook_name in nb_:
-                        os.makedirs(os.path.join(tmp, notebook_name + "_reference"))
-                        run_notebook(nb_, os.path.join(tmp, notebook_name + "_reference"))
-                        netcdf_files_reference = glob.glob(os.path.join(tmp, notebook_name + "_reference", "Save", "*"))
-                        for local_file, reference_file in zip(netcdf_files, netcdf_files_reference):
-                            if os.path.exists(local_file) and os.path.exists(reference_file):
-                                result = compare_files(local_file, reference_file)
-                                print(f"Comparison result for {nb_}: {'Same' if result else 'Different'}")
-                        break
+        for source_reference in source_references:
+            target_reference = source_reference.replace("source_data_references", "target_data_references")
+            if os.path.exists(target_reference):
+                result = compare_files(source_reference, target_reference)
+                print(f"Comparison result for {source_reference} and {target_reference}: {'Same' if result else 'Different'}")
 
 
 if __name__ == "__main__":
